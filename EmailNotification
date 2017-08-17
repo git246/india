@@ -31,9 +31,9 @@ public class SendHTMLEmail2{
  public static void main(String[] args) {
   final String host="smtp.gmail.com";
   final String port="25";
-  final String username = "mail2java@gmail.com";
+  final String username = "userMail@gmail.com";
   final String password = "XXX";
-  final String toEmail = "rajesh@gmail.com";
+  final String toEmail = "destination@gmail.com";
   final String toAddress="Testing Email";
   final String body="Dear Mail Crawler,"+ "\n\n No spam to my email, please!";
   
