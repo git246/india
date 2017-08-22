@@ -1,0 +1,297 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.DoubleSummaryStatistics;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+public class StudentTest {
+	public static <T> void processStudent(List<T> students,
+			Consumer<T> consumer) {
+		for (T emp : students) {
+			consumer.accept(emp);
+		}
+	}
+	
+	public static <T> List<T> filterListBasedOnPredicate(List<T> employees,Predicate<T> predicate) {
+	    List<T> tmpList = new ArrayList<>();
+	    for (T emp : employees) {
+	             if (predicate.test(emp)) {
+	                      tmpList.add(emp);
+	             }
+	    }
+	    return tmpList;
+	}
+
+	public static <T, R1, R2> Map<R1, R2> getEmpDetails(List<T> employees,
+			Function<T, R1> function1, Function<T, R2> function2) {
+		Map<R1, R2> tmp = new HashMap<>();
+		for (T emp : employees) {
+			R1 id = function1.apply(emp);
+			R2 name = function2.apply(emp);
+			tmp.put(id, name);
+		}
+		return tmp;
+	}
+	
+	public static void main(String args[]) {
+		Student emp1 = new Student(1, "Hari Krishna", "Gurram", 26,"Bangalore", 45000);
+		Student emp2 = new Student(2, "Joel", "Chelli", 27, "Hyderabad",40000);
+		Student emp3 = new Student(3, "Shanmukh", "Kummary", 28, "Chennai",	50000);
+		Student emp4 = new Student(4, "Harika", "Raghuram", 27, "Chennai",70000);
+/*		Student emp5 = new Student(5, "Sudheer", "Ganji", 27, "Bangalore",
+				55000);
+		Student emp6 = new Student(6, "Rama Krishna", "Gurram", 27,
+				"Bangalore", 100000);
+		Student emp7 = new Student(7, "PTR", "PTR", 27, "Hyderabad", 150000);
+		Student emp8 = new Student(8, "Siva krishna", "Ponnam", 28,
+				"Hyderabad", 65000);*/
+
+		List<Student> students = new ArrayList<>();
+
+		students.add(emp1);
+		students.add(emp2);
+		students.add(emp3);
+		students.add(emp4);
+//		employees.add(emp5);
+//		employees.add(emp6);
+//		employees.add(emp7);
+//		employees.add(emp8);
+//
+//		System.out.println("Student salaries before incrementing");
+//		System.out.println(employees);
+		
+		
+		//predicate
+		System.out.println("1)Predicate -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		System.out.println((filterListBasedOnPredicate(students,(employee) -> employee.getStudentStifund()> 50000)).toString());
+		//consumer
+		System.out.println("2)consumer -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		processStudent(students, emp -> {
+			double salary = emp.getStudentStifund();
+			salary = salary > 50000 ? salary + 0.5 * salary : salary + 0.0
+					* salary;
+			emp.setStudentStifund(salary);
+		});
+
+		System.out.println("\nEmployee salaries after incrementing");
+		System.out.println(students);
+		
+		//funtional interface
+		System.out.println("3)Funtional Interface -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		Map<Integer, String> details = getEmpDetails(students,
+				(emp) -> emp.getId(), (emp) -> emp.getFirstName());
+		System.out.println(details);
+		//Method Referance
+		System.out.println("4)Method Referance -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		EmployeeComparator2 comparisonProvider = new EmployeeComparator2();
+		System.out.println("Sort employees by first name");
+		students.sort(comparisonProvider::compareByFirstName);
+		System.out.println(students);
+		
+		System.out.println("\nSort employees by salary");
+		students.sort(comparisonProvider::compareBySalary);
+		System.out.println(students);
+		//Streams
+		System.out.println("5)Streams -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		List<String> firstNames = students.stream()
+				.filter((Student emp) -> emp.getStudentStifund() > 40000)
+				.sorted(Comparator.comparing(Student::getStudentStifund))
+				.map(Student::getFirstName).collect(Collectors.toList());
+		System.out.println(firstNames);
+		
+		System.out.println("6)filter,distint,limit,sorting,collectors -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		List<Student> temp;
+		// Get all employees staying at Chennai
+		temp = students.stream().filter((emp) -> emp.getCity().equals("Chennai")).collect(Collectors.toList());
+		System.out.println(temp + "\n");
+
+		// Get all employees whose salary > 100000
+		temp = students.stream().filter((emp) -> emp.getStudentStifund() > 100000).collect(Collectors.toList());
+		System.out.println(temp + "\n");
+
+		// Get all employees whose salary > 100000
+		temp = students.stream().filter((emp) -> emp.getStudentStifund() > 100000).distinct().collect(Collectors.toList());
+		System.out.println(temp + "\n");
+
+		// Get first 3 employees whose salary is > 50000
+		temp = students.stream().filter((emp) -> emp.getStudentStifund() > 50000).distinct().limit(3)
+				.collect(Collectors.toList());
+		System.out.println(temp + "\n");
+
+		// Sort employees by salary, whose salary is > 80000
+		temp = students.stream().filter((emp) -> emp.getStudentStifund() > 80000).distinct()
+				.sorted(Comparator.comparing(Student::getStudentStifund)).collect(Collectors.toList());
+		System.out.println(temp + "\n");
+
+		/*
+		 * * Sort employees by salary, whose salary is > 80000, and skip first 3
+		 * employees.
+		 */
+		temp = students.stream().filter((emp) -> emp.getStudentStifund() > 80000).distinct()
+				.sorted(Comparator.comparing(Student::getStudentStifund)).skip(3).collect(Collectors.toList());
+		System.out.println(temp + "\n");
+
+		// Get all firstNames from all employees.
+		List<String> firstNames3 = students.stream().map(Student::getFirstName).collect(Collectors.toList());
+		System.out.println(firstNames3 + "\n");
+
+		// Get id, Student from all employees.
+		Map<Integer, Student> map = students.stream().distinct()
+				.collect(Collectors.toMap(Student::getId, employee -> employee));
+		System.out.println(map + "\n");
+
+		// Get id, firstName from all employees.
+		Map<Integer, String> map1 = students.stream().distinct()
+				.collect(Collectors.toMap(Student::getId, Student::getFirstName));
+		System.out.println(map1 + "\n");
+
+		// Get length of all employee first names
+		List<Integer> lengths = students.stream().map(Student::getFirstName).map(String::length)
+				.collect(Collectors.toList());
+		System.out.println(lengths + "\n");
+
+		System.out.println("7)NUmeric Streams --- IntStream,LongStream, DoubleStream -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+		// NUmeric Streams --- IntStream,LongStream, DoubleStream
+		// Get sum of all employee salaries
+		double totalSalary = students.stream().mapToDouble(Student::getStudentStifund).sum();
+
+		// Minimum salary
+		OptionalDouble minSalary = students.stream().mapToDouble(Student::getStudentStifund).min();
+
+		// Maximum salary
+		OptionalDouble maxSalary = students.stream().mapToDouble(Student::getStudentStifund).max();
+
+		// Average salary
+		OptionalDouble avgSalary = students.stream().mapToDouble(Student::getStudentStifund).average();
+
+		System.out.println("Total Salary : " + totalSalary);
+		System.out.println("Minimum Salary : " + minSalary.getAsDouble());
+		System.out.println("Maximum Salary : " + maxSalary.getAsDouble());
+		System.out.println("Average Salary : " + avgSalary.getAsDouble());
+		System.out.println("8)Streams: Searching and finding ::anyMatch,allMatch,noneMatch,findAny,findFirst -@@@@@@@@@@@@@@@@@@@@@@@@@@");
+
+		// Streams: Searching and finding ::anyMatch,allMatch,noneMatch,findAny,findFirst
+		// Check whether any employee exist in stream, where salary > 100000
+		boolean result = students.stream().anyMatch((emp) -> emp.getStudentStifund() > 100000);
+		System.out.println(result);
+
+		// Check whether any employee exist in stream, where salary < 10000
+		result = students.stream().anyMatch((emp) -> emp.getStudentStifund() < 10000);
+		System.out.println(result);
+
+		// Check whether all employees are getting salary > 25000
+		result = students.stream().allMatch((emp) -> emp.getStudentStifund() > 25000);
+		System.out.println(result);
+
+		/*
+		 * Check whether all employees are getting salary > 25000 using
+		 * noneMatch function
+		 */
+		result = students.stream().noneMatch((emp) -> emp.getStudentStifund() <= 25000);
+		System.out.println(result);
+
+		// Find any employee whose salary > 100000
+		Optional<Student> oneEmp = students.stream().filter((emp) -> emp.getStudentStifund() > 100000).findAny();
+		System.out.println(oneEmp.get());
+
+		/*
+		 * Find first employee (In ascending order of salary), whose salary >
+		 * 100000.
+		 */
+		oneEmp = students.stream().filter((emp) -> emp.getStudentStifund() > 100000)
+				.sorted(Comparator.comparing(Student::getStudentStifund)).findFirst();
+		System.out.println(oneEmp.get());
+
+		System.out.println("9) Java8: Streams: Reduce operation -@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+		// Java8: Streams: Reduce operation
+		List<Integer> numbers = Arrays.asList(2, 5, 18, 3, 14, 28, 91, 43, 26);
+
+		/* Perform sum of numbers */
+		int sum = numbers.stream().reduce(0, (a, b) -> a + b);
+
+		// Perform multiplication of numbers
+		int mul = numbers.stream().reduce(1, (a, b) -> a * b);
+
+		// Find maximum number
+		int max = numbers.stream().reduce(Integer.MIN_VALUE, (a, b) -> ((a > b) ? a : b));
+
+		// Find minimum number
+		int min = numbers.stream().reduce(Integer.MAX_VALUE, (a, b) -> ((a > b) ? b : a));
+
+		System.out.println("Sum of numbers : " + sum);
+		System.out.println("Multiplication of numbers : " + mul);
+		System.out.println("Maximum of numbers : " + max);
+		System.out.println("Minimum of numbers : " + min);
+		System.out.println("10) Summarizing/Reducing elements according to certain criteria,Grouping elements, Partitioning elements.");
+		// Summarizing/Reducing elements according to certain criteria,Grouping
+		// elements, Partitioning elements.
+		/* Count number of employees who are stying in Chennai */
+		long noOfEmployees = students.stream().filter((emp) -> emp.getCity().equals("Chennai"))
+				.collect(Collectors.counting());
+		System.out.println("Number Of employees in Chennai" + noOfEmployees + "\n");
+
+		/* Find maximum salaried employee */
+		Optional<Student> emp = students.stream()
+				.collect(Collectors.maxBy(Comparator.comparing(Student::getStudentStifund)));
+		System.out.println("Maximum salaried employee" + emp + "\n");
+
+		/* Find maximum salaried employee */
+		emp = students.stream().collect(Collectors.minBy(Comparator.comparing(Student::getStudentStifund)));
+		System.out.println("Minimum salaried employee" + emp + "\n");
+
+		/* Find total salary of all employees */
+		double totalSalary1 = students.stream().collect(Collectors.summingDouble(Student::getStudentStifund));
+		System.out.println("Totala salry is " + totalSalary1 + "\n");
+
+		/* Find average salary of all employees */
+		double avgSalary1 = students.stream().collect(Collectors.averagingDouble(Student::getStudentStifund));
+		System.out.println("Average saary of employees is" + avgSalary1 + "\n");
+
+		/*
+		 * Find number of employees, sum of their salaries, maximum, minimum and
+		 * average of salaries in single statement.
+		 */
+		DoubleSummaryStatistics statistics = students.stream()
+				.collect(Collectors.summarizingDouble(Student::getStudentStifund));
+		System.out.println(statistics + "\n");
+
+		/* Find all employee firstNames separated by ,. */
+		String firstNames1 = students.stream().map(Student::getFirstName).collect(Collectors.joining(","));
+		System.out.println(firstNames1 + "\n");
+
+		/* Group employees by city */
+		Map<String, List<Student>> groupByCity = students.stream().collect(Collectors.groupingBy(Student::getCity));
+		System.out.println(groupByCity + "\n");
+
+		/* Group employees by age */
+		Map<Integer, List<Student>> groupByAge = students.stream().collect(Collectors.groupingBy(Student::getAge));
+		System.out.println(groupByAge + "\n");
+
+		/* Group employees by city and age */
+		Map<String, Map<Integer, List<Student>>> groupByCityAndAge = students.stream()
+				.collect(Collectors.groupingBy(Student::getCity, Collectors.groupingBy(Student::getAge)));
+		System.out.println(groupByCityAndAge + "\n");
+
+		/*
+		 * Get all employees who are staying in Chennai and who are not staying
+		 * in Chennai
+		 */
+		Map<Boolean, List<Student>> partitionEmp = (Map) students.stream()
+				.collect(Collectors.partitioningBy((emp5) -> emp5.getCity().equals("Chennai")));
+		List<Student> chennaiEmp = partitionEmp.get(true);
+		List<Student> nonChennaiEmp = partitionEmp.get(false);
+
+		System.out.println(chennaiEmp + "\n");
+		System.out.println(nonChennaiEmp);
+	}
+
+}
